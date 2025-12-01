@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#define SCREENWIDTH 450
-#define SCREENHEIGHT 450
+#define SCREENWIDTH 750
+#define SCREENHEIGHT 750
 
 struct AddCube;
 struct ChangeColor;
@@ -30,7 +30,7 @@ struct AddCube final : Action {
   }
   
   void execute() override{
-    cubes.emplace_back(x, y, GRID + 1, GRID + 1);
+    cubes.emplace_back(x, y, GRID, GRID);
     colors.emplace_back(chosenColor);
   }
 };
@@ -90,15 +90,21 @@ struct EraseCube final : Action{
   }
 
   void colorWindow(bool& ON_OFF, auto& actions){
-    Rectangle recWindow = {25, 280, SCREENWIDTH / 3, SCREENHEIGHT / 3}; 
+    Rectangle recWindow = {25, 280, SCREENWIDTH / 4, SCREENHEIGHT / 4}; 
     static std::string getColor = "";
     char key = GetCharPressed();
+    static int quickFix = 0;
 
     if(!ON_OFF){
      recWindow = {0, 0, 0, 0};
      getColor.clear();
+     quickFix = 0;
     }
     else{
+      while(quickFix == 0){
+        key = NULL;
+        ++quickFix;
+      }
      if(key != 0 && !IsKeyPressed(KEY_ENTER) && getColor.length() < 8) getColor += static_cast<char>(key);
      if(IsKeyDown(KEY_BACKSPACE) && !getColor.empty()) getColor.pop_back();
      if(IsKeyPressed(KEY_ENTER)) actions.emplace_back(std::make_unique<ChangeColor>(getColor));
@@ -111,6 +117,16 @@ struct EraseCube final : Action{
     }
   }
 
+  void helpWindow(bool& ON_OFF){
+    if(ON_OFF){
+      DrawText("T - Open the color window", SCREENHEIGHT - 320, SCREENWIDTH - 100, 20, BLACK);
+      DrawText("V - Hide/Show grid", SCREENHEIGHT - 320, SCREENWIDTH - 75, 20, BLACK);
+      DrawText("UpArrow - Double the grid size", SCREENHEIGHT - 320, SCREENWIDTH - 50, 20, BLACK);
+      DrawText("DownArrow - Half the grid size", SCREENHEIGHT - 320, SCREENWIDTH - 25, 20, BLACK);
+      DrawText("H - Close the helpWindow", SCREENHEIGHT - 320, SCREENWIDTH - 5, 20, BLACK);
+    }
+  }
+
   Vector2 snap2Grid(Vector2 Pos);
 
   void Update(){
@@ -118,8 +134,8 @@ struct EraseCube final : Action{
      Vector2 newcubePos = snap2Grid(Vector2{cubes[i].x, cubes[i].y});
      cubes[i].x = newcubePos.x;
      cubes[i].y = newcubePos.y;
-     cubes[i].height = GRID - 1;
-     cubes[i].width = GRID - 1;
+     cubes[i].height = GRID + 1;
+     cubes[i].width = GRID + 1;
     } 
   }
 
@@ -131,10 +147,8 @@ struct EraseCube final : Action{
   }
 
   int main(){
-    bool colorWindow_on_off = false;
-    bool grid_on_off = true;
-    int colorWindow_buffer = 0;
-    int grid_buffer = 0;
+    bool colorWindow_on_off = false, gridWindow_on_off = false, helpWindow_on_off = true;
+    int colorWindow_buffer = 0, grid_buffer = 0, help_buffer = 1;
     if(colors.empty()) colors.emplace_back(WHITE);
 
     InitWindow(SCREENHEIGHT, SCREENWIDTH, "MacSprites");
@@ -154,13 +168,17 @@ struct EraseCube final : Action{
        Vector2 posMouse_snap = snap2Grid(posMouse);
        actions.emplace_back(std::make_unique<EraseCube>(posMouse_snap));
       }
-      if(IsKeyPressed(KEY_C)){
+      if(IsKeyPressed(KEY_T)){
         ++colorWindow_buffer;
         colorWindow_on_off = colorWindow_buffer % 2;
       }
       if(IsKeyPressed(KEY_V)){
         ++grid_buffer;
-        grid_on_off = grid_buffer % 2;
+        gridWindow_on_off = grid_buffer % 2;
+      }
+      if(IsKeyPressed(KEY_H)){
+        ++help_buffer;
+        helpWindow_on_off = help_buffer % 2;
       }
       if(IsKeyPressed(KEY_UP)){
         GRID *= 2;
@@ -169,7 +187,6 @@ struct EraseCube final : Action{
         GRID /= 2;
       }
 
-
       for(const auto& act: actions){
         act->execute();
       }
@@ -177,17 +194,19 @@ struct EraseCube final : Action{
       actions.clear();
 
      BeginDrawing();
+
        ClearBackground(GRAY);
        Update();
-       drawgrid(GRID, grid_on_off);
+       drawgrid(GRID, gridWindow_on_off);
 
        for(int i{0}; i < cubes.size(); i++){
         DrawRectangleRec(cubes[i], colors[i]);
        }
 
        colorWindow(colorWindow_on_off, actions);
+       helpWindow(helpWindow_on_off);
 
-    EndDrawing();
+     EndDrawing();
 
   }
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
 
-project(example LANGUAGES CXX) # Generate compile_commands.json
+project(macsprite LANGUAGES CXX) # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -34,7 +34,7 @@ target_link_libraries(${PROJECT_NAME} raylib)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html") # Tell Emscripten to build an example.html file.
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html") # Tell Emscripten to build an macsprite.html file.
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1")
 endif()
 
