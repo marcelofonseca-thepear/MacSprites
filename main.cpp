@@ -122,11 +122,13 @@ void drawChangeSizeWindow(){
 }
 
 void drawHelpWindow(){
-     DrawText("T - Open the color picker", SCREENHEIGHT / 20, SCREENWIDTH / 10, 20, BLACK);
-     DrawText("V - Hide/Show grid", SCREENHEIGHT / 20 , SCREENWIDTH / 8.65, 20, BLACK);
-     DrawText("UpArrow - Double the grid size", SCREENHEIGHT / 20, SCREENWIDTH / 7.65, 20, BLACK);
-     DrawText("DownArrow - Half the grid size", SCREENHEIGHT / 20, SCREENWIDTH / 6.65, 20, BLACK);
+     DrawText("CTRL + C - Open the color picker window", SCREENHEIGHT / 20, SCREENWIDTH / 10, 20, BLACK);
+     DrawText("CTRL + V - Hide/Show grid", SCREENHEIGHT / 20 , SCREENWIDTH / 8.65, 20, BLACK);
+     DrawText("CTRL + R - Change drawable screen size", SCREENHEIGHT / 20, SCREENWIDTH / 7.65, 20, BLACK);
+     DrawText("CTRL + Z - Go back", SCREENHEIGHT / 20, SCREENWIDTH / 6.65, 20, BLACK);
      DrawText("H - Close the instruction window", SCREENHEIGHT / 20, SCREENWIDTH / 6, 20, BLACK);
+     DrawText("UpArrow - Double the grid size", SCREENHEIGHT / 20, SCREENWIDTH / 5.45, 20, BLACK);
+     DrawText("DownArrow - Half the grid size", SCREENHEIGHT / 20, SCREENWIDTH / 5, 20, BLACK);
 }
 
 Vector2 snap2Grid(Vector2 Pos){
@@ -160,7 +162,7 @@ int main(){
    if(colors.empty()) colors.emplace_back(WHITE);
 
    InitWindow(SCREENHEIGHT, SCREENWIDTH, "MacSprites");
-   SetTargetFPS(60);
+   SetTargetFPS(30);
 
    State state;
    std::vector<std::unique_ptr<Commands>> Historic;
@@ -209,7 +211,7 @@ int main(){
      if(IsKeyPressed(KEY_H)){
       switchBool(switch_help);
      }
-     if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y)){
+     if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
       switchBool(switch_colorwindow);
      }
      if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_R)){
@@ -217,6 +219,9 @@ int main(){
      }
      if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_V)){
       switchBool(switch_grid);
+     }
+     if(IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_Z)){
+      undo();
      }
      if(IsKeyPressed(KEY_UP) && GRID < 128){
        GRID *= 2;

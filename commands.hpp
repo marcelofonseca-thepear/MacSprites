@@ -47,22 +47,22 @@ struct AddCube final : Commands {
 
 struct ChangeColor final : Commands{
   bool wasChanged;
-  Color NewColor;
-  Color LastColor;
+  Color newColor;
+  Color lastColor;
 
   ChangeColor(std::string& c){
     int getHex = std::stol("0x" + c + "ff", nullptr, 16);
-    NewColor = GetColor(getHex);
+    newColor = GetColor(getHex);
   }
 
   void execute(State& state) override{ 
-    LastColor = colors.back();
-     colors.back() = NewColor;;
+    lastColor = colors.back();
+     colors.back() = newColor;;
       wasChanged = true;
   }
   void undo(State& state) override{
     if(wasChanged && !colors.empty()){
-     colors.pop_back();
+      colors.back() = lastColor;
     }
   }
 };
@@ -71,7 +71,7 @@ struct EraseBlock final : Commands{
     Vector2 posMouse;  
     Rectangle lastBlock;
     Color lastColor;
-    int goBack;
+    int goBack{-1};
 
     EraseBlock(Vector2& v) : posMouse(v){ 
       std::println("Cubo removido em x:{} e y:{}", posMouse.x, posMouse.y);
@@ -94,7 +94,7 @@ struct EraseBlock final : Commands{
   }
 
   void undo(State& state) override{
-    if(!cubes.empty() && !colors.empty()){
+    if(goBack != -1){
      cubes.insert(cubes.begin() + goBack, lastBlock);
      colors.insert(colors.begin() + goBack, lastColor);
    }
